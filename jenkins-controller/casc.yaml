@@ -1,0 +1,17 @@
+jenkins:
+  systemMessage: |
+    Jenkins Docker Image Built from https://github.com/gastrogee/jenkins-nomad-docker
+  securityRealm:
+    local:
+      allowsSignup: false
+      enableCaptcha: false
+      users:
+        - id: "admin"
+          password: "admin"
+  authorizationStrategy: unsecured
+
+tool:
+  git:
+    installations:
+      - home: "/usr/bin/git"
+        name: “Default"

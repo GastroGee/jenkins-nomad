@@ -1,0 +1,59 @@
+jenkins:
+ clouds:
+ - nomad:
+     name: nomad_cloud
+     nomadUrl: http://172.20.133.106:4646
+     prune: true
+     templates:
+     - idleTerminationInMinutes: 10
+       jobTemplate: |-
+             {
+                 "Job": {
+                    "Region": "global",
+                    "ID": "%WORKER_NAME%",
+                     "Type": "batch",
+                     "Datacenters": [
+                       "test"
+                     ],
+                     "TaskGroups": [
+                      {
+                      "Name": "jenkins-worker-taskgroup",
+                      "Count": 1,
+                      "RestartPolicy": {
+                        "Attempts": 0,
+                        "Interval": 10000000000,
+                        "Mode": "fail",
+                        "Delay": 1000000000
+                      },
+                      "Tasks": [
+                      {
+                       "Name": "jenkins-worker",
+                       "Driver": "docker",
+                       "Config": {
+                         "image": "jenkins/inbound-agent"
+                      },
+                      "Env": {
+                         "JENKINS_URL": "http://172.20.133.106:8080",
+                         "JENKINS_AGENT_NAME": "%WORKER_NAME%",
+                         "JENKINS_SECRET": "%WORKER_SECRET%",
+                         "JENKINS_TUNNEL": "172.20.133.106:50000"
+                      },
+                      "Resources": {
+                         "CPU": 500,
+                         "MemoryMB": 256
+                      }
+                    }
+                   ],
+                    "EphemeralDisk": {
+                       "SizeMB": 300
+                     }
+                    }
+                   ]
+                  }
+
+       labels: "nomad"
+       numExecutors: 1
+       prefix: "jenkins"
+       reusable: true
+     tlsEnabled: false
+     workerTimeout: 1

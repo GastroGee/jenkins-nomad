@@ -1,0 +1,60 @@
+version: '3.6'
+
+services:
+  nomad:
+    image: gastro/nomad:latest
+    build:
+      context: ./nomad
+      dockerfile: nomad.Dockerfile
+    command: agent -dev
+    privileged: true
+    environment:
+      NOMAD_LOCAL_CONFIG: |
+        datacenter = "${REGION:-test}"
+        region     = "${DATACENTER:-test-dc1}"
+        data_dir = "/nomad/data/"
+        bind_addr = "0.0.0.0"
+        advertise {
+          http = "{{ GetPrivateIP }}:4646"
+          rpc  = "{{ GetPrivateIP }}:4647"
+          serf = "{{ GetPrivateIP }}:4648"
+        }
+
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - nomad-data:/nomad/data
+    ports:
+      - 4646:4646
+    networks:
+      frontend:
+        ipv4_address: 192.168.17.2
+
+  jenkins:
+    image: gastro/jenkins:latest
+    build:
+      context: ./jenkins-controller
+      dockerfile: jenkins.Dockerfile
+    privileged: true
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - jenkins-data:/var/jenkins_home
+    ports:
+      - 8080:8080
+      - 50000:50000
+    environment:
+      JAVA_OPTS: "-Djenkins.install.runSetupWizard=false"
+      CASC_JENKINS_CONFIG: "/etc/jenkins"
+    networks:
+      frontend:
+        ipv4_address: 192.168.17.3
+
+networks:
+  frontend:
+    ipam:
+      driver: default
+      config:
+        - subnet: "192.168.17.0/24"
+
+volumes:
+  jenkins-data:
+  nomad-data:
