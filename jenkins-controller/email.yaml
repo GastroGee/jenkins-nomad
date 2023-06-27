@@ -1,8 +1,8 @@
 unclassified:
   mailer:
     charset: "UTF-8"
-    defaultSuffix: "@code42.com"
-    replyToAddress: "rpg@code42.com"
+    defaultSuffix: "@gastro.io"
+    replyToAddress: "gang@gastro.io"
     smtpHost: "smtp-relay.gmail.com"
     smtpPort: 587
     useSsl: false
